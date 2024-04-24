@@ -66,6 +66,39 @@ asmEncrypt:
     
     /* YOUR asmEncrypt CODE BELOW THIS LINE! VVVVVVVVVVVVVVVVVVVVV  */
     
+    /* load r1 */
+    mov r5, r1
+    /* load cypherText to r6 */
+    ldr r6, =cipherText
+encrypt_loop:
+    /* load r0 */
+    ldrb r4, [r0], #1
+    
+    /* check for null terminator */
+    cmp r4, #0
+    beq encrypt_done
+    
+    /* check if character is alphabetic (greater than 65) */
+    cmp r4, #65
+    blt store_character
+    
+add_shift_upper:
+    add r4, r4, r1
+    cmp r4, #90
+    blt shift_upper
+    
+shift_upper:
+    sub r4, r4, #90
+    add r4, r4, #65
+    b store_character
+
+    
+store_character:
+    strb r4, [r6], #1
+    b encrypt_loop
+    
+encrypt_done:
+    ldr r0, =cipherText
     /* YOUR asmEncrypt CODE ABOVE THIS LINE! ^^^^^^^^^^^^^^^^^^^^^  */
 
     # restore the caller's registers, as required by the ARM calling convention
