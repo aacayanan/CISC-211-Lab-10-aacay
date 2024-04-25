@@ -78,26 +78,40 @@ encrypt_loop:
     cmp r4, #0
     beq encrypt_done
     
-    /* check if character is alphabetic (greater than 65) */
+    /* check if character is UPPERCASE (greater than 65 but less than 90) */
     cmp r4, #65
-    blt store_character
-    
-add_shift_upper:
-    add r4, r4, r1
+    blt not_upper
     cmp r4, #90
-    blt shift_upper
+    bgt not_upper
     
-shift_upper:
-    sub r4, r4, #90
-    add r4, r4, #65
+    /* if it's an uppercase letter */
+    add r4, r4, r5
+    cmp r4, #90
+    ble store_character	/* if within range, store it */
+    sub r4, r4, #26	/* otherwise wrap around */
     b store_character
-
+    
+not_upper:
+    /* check if character is LOWERCASE */
+    cmp r4, #97
+    blt store_character	/* if less than then it must not be a letter */
+    cmp r4, #122
+    bgt store_character /* if greater than then it must not be a letter */
+    
+    /* if above conditions weren't met, it's a lowercase letter */
+    add r4, r4, r5
+    cmp r4, #122
+    ble store_character /* if within range, store it */
+    sub r4, r4, #26	/* otherwise wrap around */
+    
+    b store_character
     
 store_character:
-    strb r4, [r6], #1
+    strb r4, [r6], #1	/* store character in cipherText */
     b encrypt_loop
     
 encrypt_done:
+    strb r4, [r6], #1	/* store null terminator in cipherText*/
     ldr r0, =cipherText
     /* YOUR asmEncrypt CODE ABOVE THIS LINE! ^^^^^^^^^^^^^^^^^^^^^  */
 
